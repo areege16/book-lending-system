@@ -1,0 +1,18 @@
+﻿using FluentValidation;
+
+namespace BookLending.Application.Account.Login
+{
+    class LoginValidator : AbstractValidator<LoginCommand>
+    {
+        public LoginValidator()
+        {
+            RuleFor(x => x.LoginRequestDto.UserName)
+                .NotEmpty()
+                .WithMessage("Username is required");
+
+            RuleFor(x => x.LoginRequestDto.Password)
+                .NotEmpty()
+                .WithMessage("Password is required");
+        }
+    }
+}

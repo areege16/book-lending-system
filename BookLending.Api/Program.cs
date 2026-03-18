@@ -1,13 +1,17 @@
 
 using BookLending.Api.Middlewares;
 using BookLending.Api.Seed;
+using BookLending.Application.Abstractions;
+using BookLending.Application.Account.Register;
 using BookLending.Application.AutoMapperProfile;
 using BookLending.Application.Common.Behaviors;
 using BookLending.Application.RepositoryContract;
+using BookLending.Application.Setting;
 using BookLending.Application.UnitOfWorkContract;
 using BookLending.Domain.Models;
 using BookLending.Infrastructure.Context;
 using BookLending.Infrastructure.RepositoryImplementation;
+using BookLending.Infrastructure.Services;
 using BookLending.Infrastructure.UnitOfWorkImplementation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -85,7 +89,17 @@ namespace BookLending.Api
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddSingleton<ITokenService, TokenService>();
+            builder.Services.AddScoped<AdminSeeder>();
 
+            builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection("AdminSeed"));
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
+
+            builder.Services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(typeof(RegisterHandler).Assembly);
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            });
             builder.Services.AddAutoMapper(typeof(BookLending_Profile).Assembly);
 
             builder.Services.AddFluentValidation();
@@ -97,7 +111,10 @@ namespace BookLending.Api
             using (var scope = app.Services.CreateScope())
             {
                 var scopedServices = scope.ServiceProvider;
+
                 await RoleSeeder.SeedRoles(scopedServices);
+                var adminSeeder = scopedServices.GetRequiredService<AdminSeeder>();
+                await adminSeeder.SeedAdminAsync(scopedServices);
             }
 
             if (app.Environment.IsDevelopment())
