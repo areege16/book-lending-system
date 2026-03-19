@@ -11,10 +11,12 @@ namespace BookLending.Application.AutoMapperProfile
             CreateMap<CreateBookDto, Book>();
 
             CreateMap<UpdateBookDto, Book>()
-                  .ForMember(dest => dest.CoverImage, opt => opt.Ignore())
+                 .ForMember(dest => dest.CoverImage, opt => opt.Ignore())
                  .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<Book, BookDetailsDto>();
 
+            CreateMap<Book, BookSummaryDto>();
         }
     }
 }

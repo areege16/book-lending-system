@@ -3,6 +3,8 @@ using BookLending.Application.Abstractions;
 using BookLending.Application.Books.Commands.CreateBook;
 using BookLending.Application.Books.Commands.DeleteBook;
 using BookLending.Application.Books.Commands.UpdateBook;
+using BookLending.Application.Books.Queries.GetAllBooks;
+using BookLending.Application.Books.Queries.GetBookById;
 using BookLending.Application.DTOs.Book;
 using BookLending.Domain.Constants;
 using MediatR;
@@ -25,7 +27,7 @@ namespace BookLending.Api.Controllers
         }
 
         #region CreateBook
-        [HttpPost]
+        [HttpPost("admin")]
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookRequest request)
         {
@@ -52,7 +54,7 @@ namespace BookLending.Api.Controllers
         #endregion
 
         #region UpdateBook
-        [HttpPut("{id}")]
+        [HttpPut("admin/{id}")]
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> UpdateBook(int id, [FromForm] UpdateBookRequest request)
         {
@@ -78,13 +80,31 @@ namespace BookLending.Api.Controllers
         #endregion
 
         #region DeleteBook
-        [HttpDelete("{id}")]
+        [HttpDelete("admin/{id}")]
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _mediator.Send(new DeleteBookCommand(id));
             return Ok(result);
         }
+        #endregion
+
+        #region GetAllBooks
+        [HttpGet]
+        public async Task<IActionResult> GetAllBooks(int pageNumber = 1, int pageSize = 10)
+        {
+            var result = await _mediator.Send(new GetAllBooksQuery(pageNumber, pageSize));
+            return Ok(result);
+        }
+        #endregion
+
+        #region GetBookById
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookById(int id)
+        {
+            var result = await _mediator.Send(new GetBookByIdQuery(id));
+            return Ok(result);
+        } 
         #endregion
     }
 }
