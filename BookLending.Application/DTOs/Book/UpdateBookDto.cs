@@ -1,4 +1,4 @@
-﻿namespace BookLending.Application.DTOs.Admin.Book
+﻿namespace BookLending.Application.DTOs.Book
 {
     public record UpdateBookDto
    (

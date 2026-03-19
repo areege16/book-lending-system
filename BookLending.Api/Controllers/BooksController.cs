@@ -1,19 +1,18 @@
 ﻿using BookLending.Api.Requests.Books;
 using BookLending.Application.Abstractions;
-using BookLending.Application.Admin.Books.Commands.CreateBook;
-using BookLending.Application.Admin.Books.Commands.DeleteBook;
-using BookLending.Application.Admin.Books.Commands.UpdateBook;
-using BookLending.Application.DTOs.Admin.Book;
+using BookLending.Application.Books.Commands.CreateBook;
+using BookLending.Application.Books.Commands.DeleteBook;
+using BookLending.Application.Books.Commands.UpdateBook;
+using BookLending.Application.DTOs.Book;
 using BookLending.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookLending.Api.Controllers.Admin
+namespace BookLending.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = Roles.Admin)]
     public class BooksController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -27,6 +26,7 @@ namespace BookLending.Api.Controllers.Admin
 
         #region CreateBook
         [HttpPost]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookRequest request)
         {
             string? coverImage = null;
@@ -53,6 +53,7 @@ namespace BookLending.Api.Controllers.Admin
 
         #region UpdateBook
         [HttpPut("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> UpdateBook(int id, [FromForm] UpdateBookRequest request)
         {
             string? coverImagePath = null;
@@ -78,6 +79,7 @@ namespace BookLending.Api.Controllers.Admin
 
         #region DeleteBook
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _mediator.Send(new DeleteBookCommand(id));

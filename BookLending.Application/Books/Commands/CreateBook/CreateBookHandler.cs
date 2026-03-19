@@ -5,7 +5,7 @@ using BookLending.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace BookLending.Application.Admin.Books.Commands.CreateBook
+namespace BookLending.Application.Books.Commands.CreateBook
 {
     public class CreateBookHandler : IRequestHandler<CreateBookCommand, ResponseDto<bool>>
     {

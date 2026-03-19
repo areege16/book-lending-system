@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BookLending.Application.DTOs.Admin.Book;
+using BookLending.Application.DTOs.Book;
 using BookLending.Domain.Models;
 
 namespace BookLending.Application.AutoMapperProfile

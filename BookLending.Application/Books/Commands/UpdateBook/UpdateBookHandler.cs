@@ -7,7 +7,7 @@ using BookLending.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace BookLending.Application.Admin.Books.Commands.UpdateBook
+namespace BookLending.Application.Books.Commands.UpdateBook
 {
     public class UpdateBookHandler : IRequestHandler<UpdateBookCommand, ResponseDto<bool>>
     {

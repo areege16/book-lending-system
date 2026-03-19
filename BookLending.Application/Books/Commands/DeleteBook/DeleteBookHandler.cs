@@ -6,7 +6,7 @@ using BookLending.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace BookLending.Application.Admin.Books.Commands.DeleteBook
+namespace BookLending.Application.Books.Commands.DeleteBook
 {
     public class DeleteBookHandler : IRequestHandler<DeleteBookCommand, ResponseDto<bool>>
     {
