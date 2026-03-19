@@ -16,6 +16,7 @@ using BookLending.Infrastructure.UnitOfWorkImplementation;
 using CloudinaryDotNet;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -121,6 +122,8 @@ namespace BookLending.Api
             builder.Services.AddSingleton<ITokenService, TokenService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<AdminSeeder>();
+            builder.Services.AddScoped<IOverdueCheckService, OverdueBookJob>();
+            builder.Services.AddScoped<IEmailService, MailKitEmailService>();
 
             builder.Services.AddSingleton<Cloudinary>(sp =>
             {
@@ -133,6 +136,7 @@ namespace BookLending.Api
             builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection("AdminSeed"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
             builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("Cloudinary"));
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
             builder.Services.AddMediatR(cfg =>
             {
@@ -144,6 +148,14 @@ namespace BookLending.Api
             builder.Services.AddFluentValidation();
             builder.Services.AddValidatorsFromAssembly(BookLending.Application.AssemblyReference.Assembly, includeInternalTypes: true);
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
 
             var app = builder.Build();
 
@@ -166,8 +178,16 @@ namespace BookLending.Api
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseHangfireDashboard("/hangfire");
+
+            RecurringJob.AddOrUpdate<IOverdueCheckService>(
+                 "overdue-books-check",
+                 job => job.CheckAndNotifyOverdueBooks(),
+                 Cron.Daily);
 
             app.MapControllers();
 
