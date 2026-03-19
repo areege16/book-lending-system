@@ -13,13 +13,19 @@ using BookLending.Infrastructure.Context;
 using BookLending.Infrastructure.RepositoryImplementation;
 using BookLending.Infrastructure.Services;
 using BookLending.Infrastructure.UnitOfWorkImplementation;
+using CloudinaryDotNet;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Security.Claims;
+using System.Text;
 
 namespace BookLending.Api
 {
@@ -87,13 +93,46 @@ namespace BookLending.Api
             .AddEntityFrameworkStores<ApplicationContext>()
             .AddDefaultTokenProviders();
 
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+
+          .AddJwtBearer(options =>
+          {
+              options.SaveToken = true;
+              options.RequireHttpsMetadata = false;
+              options.TokenValidationParameters = new TokenValidationParameters
+              {
+                  ValidateIssuer = true,
+                  ValidIssuer = builder.Configuration["JWT:Issuer"],
+                  ValidateAudience = true,
+                  ValidAudience = builder.Configuration["JWT:Audience"],
+                  ValidateLifetime = true,
+                  ValidateIssuerSigningKey = true,
+                  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+                  RoleClaimType = ClaimTypes.Role,
+              };
+          });
+
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddSingleton<ITokenService, TokenService>();
+            builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<AdminSeeder>();
+
+            builder.Services.AddSingleton<Cloudinary>(sp =>
+            {
+                var settings = sp.GetRequiredService<IOptions<CloudinarySetting>>().Value;
+
+                var account = new Account(settings.Cloud, settings.ApiKey, settings.ApiSecret);
+                return new Cloudinary(account);
+            });
 
             builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection("AdminSeed"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JWT"));
+            builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("Cloudinary"));
 
             builder.Services.AddMediatR(cfg =>
             {
