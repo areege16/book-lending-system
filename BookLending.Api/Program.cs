@@ -168,11 +168,9 @@ namespace BookLending.Api
                 await adminSeeder.SeedAdminAsync(scopedServices);
             }
 
-            if (app.Environment.IsDevelopment())
-            {
+
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
 
             app.UseHttpsRedirection();
 

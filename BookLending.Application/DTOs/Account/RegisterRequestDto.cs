@@ -7,6 +7,7 @@
      string Password,
      string ConfirmPassword,
      string Email,
-     string PhoneNumber
+     string PhoneNumber,
+     string? Role = null
      );
 }
