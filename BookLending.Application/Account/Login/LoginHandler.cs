@@ -31,30 +31,30 @@ namespace BookLending.Application.Account.Login
         {
             var loginRequest = request.LoginRequestDto;
 
-            _logger.LogInformation("Login attempt for user {UserName}", loginRequest.UserName);
+            _logger.LogInformation("Login attempt for user {Email}", loginRequest.Email);
 
-            ApplicationUser user = await _userManager.FindByNameAsync(loginRequest.UserName);
+            ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
 
             if (user == null)
             {
-                _logger.LogWarning("Login failed: user not found {UserName}", loginRequest.UserName);
+                _logger.LogWarning("Login failed: user not found {Email}", loginRequest.Email);
                 return ResponseDto<LoginResponseDto>.Error(ErrorType.NotFound, "User not found");
             }
 
             bool isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
             if (!isPasswordCorrect)
             {
-                _logger.LogWarning("Login failed: invalid password for {UserName}", loginRequest.UserName);
-                return ResponseDto<LoginResponseDto>.Error(ErrorType.Unauthorized, "Invalid username or password");
+                _logger.LogWarning("Login failed: invalid password for {Email}", loginRequest.Email);
+                return ResponseDto<LoginResponseDto>.Error(ErrorType.Unauthorized, "Invalid Email or password");
             }
             var userRoles = await _userManager.GetRolesAsync(user);
             var accessToken = _tokenService.GenerateAccessToken(user, userRoles);
 
-            _logger.LogInformation("Login successful for user {UserName}", loginRequest.UserName);
+            _logger.LogInformation("Login successful for user {Email}", loginRequest.Email);
 
             var loginDto = new LoginResponseDto
             (
-                user.UserName,
+                user.Email,
                 user.FullName,
                 userRoles.FirstOrDefault(),
                 accessToken,

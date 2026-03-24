@@ -6,9 +6,9 @@ namespace BookLending.Application.Account.Login
     {
         public LoginValidator()
         {
-            RuleFor(x => x.LoginRequestDto.UserName)
+            RuleFor(x => x.LoginRequestDto.Email)
                 .NotEmpty()
-                .WithMessage("Username is required");
+                .WithMessage("Email is required");
 
             RuleFor(x => x.LoginRequestDto.Password)
                 .NotEmpty()

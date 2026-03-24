@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using BookLending.Application.Common.Responses;
 using BookLending.Application.DTOs.Borrowing;
 using BookLending.Application.UnitOfWorkContract;
-using BookLending.Domain.Enums;
 using BookLending.Domain.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +35,6 @@ namespace BookLending.Application.Borrowing.Queries.GetAllBorrowings
                 .OrderBy(br => br.BorrowDate)
                 .ProjectTo<AdminBorrowingRecordDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
-
-            if (records.Count == 0)
-            {
-                _logger.LogWarning("No borrowing records found.");
-                return ResponseDto<List<AdminBorrowingRecordDto>>.Error(ErrorType.NotFound, "No borrowing records found.");
-            }
 
             _logger.LogInformation("Fetched {Count} borrowing records.", records.Count);
             return ResponseDto<List<AdminBorrowingRecordDto>>.Success(records, "Borrowing records fetched successfully.");

@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using BookLending.Application.Common.Responses;
 using BookLending.Application.DTOs.Book;
 using BookLending.Application.UnitOfWorkContract;
-using BookLending.Domain.Enums;
 using BookLending.Domain.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -32,12 +31,6 @@ namespace BookLending.Application.Books.Queries.GetAllBooks
             var query = _unitOfWork.Repository<Book>().GetAllAsNoTracking();
 
             var totalCount = await query.CountAsync(cancellationToken);
-
-            if (totalCount == 0)
-            {
-                _logger.LogWarning("No books found.");
-                return ResponseDto<PagedResult<BookSummaryDto>>.Error(ErrorType.NotFound, "No books found");
-            }
 
             var books = await query
                 .OrderBy(b => b.Id)

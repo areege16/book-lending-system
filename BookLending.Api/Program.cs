@@ -157,6 +157,13 @@ namespace BookLending.Api
 
             builder.Services.AddHangfireServer();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("MyPolicy", policy =>
+                    policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin()
+                );
+            });
+
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
@@ -168,9 +175,10 @@ namespace BookLending.Api
                 await adminSeeder.SeedAdminAsync(scopedServices);
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-                app.UseSwagger();
-                app.UseSwaggerUI();
+            app.UseCors("MyPolicy");
 
             app.UseHttpsRedirection();
 

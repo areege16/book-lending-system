@@ -4,6 +4,7 @@ using BookLending.Application.UnitOfWorkContract;
 using BookLending.Domain.Enums;
 using BookLending.Domain.Models;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace BookLending.Application.Books.Commands.DeleteBook
@@ -36,6 +37,15 @@ namespace BookLending.Application.Books.Commands.DeleteBook
                 return ResponseDto<bool>.Error(ErrorType.NotFound, "Book not found.");
             }
 
+            var hasBorrowingHistory = await _unitOfWork.Repository<BorrowingRecord>()
+                                                       .GetFiltered(br => br.BookId == request.Id, asTracking: false)
+                                                       .AnyAsync(cancellationToken);
+
+            if (hasBorrowingHistory)
+            {
+                _logger.LogWarning("Cannot delete book {BookId}: it has borrowing history.", request.Id);
+                return ResponseDto<bool>.Error(ErrorType.Conflict, "This book cannot be deleted because it has borrowing records.");
+            }
             if (!string.IsNullOrEmpty(book.CoverImage))
             {
                 try

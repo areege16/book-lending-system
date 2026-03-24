@@ -36,12 +36,6 @@ namespace BookLending.Application.Borrowing.Queries.GetMyBorrowingHistory
                .ProjectTo<BorrowingRecordDto>(_mapper.ConfigurationProvider)
                .ToListAsync(cancellationToken);
 
-            if (records.Count == 0)
-            {
-                _logger.LogWarning("No borrowing history found for User {UserId}", request.UserId);
-                return ResponseDto<List<BorrowingRecordDto>>.Error(ErrorType.NotFound, "No borrowing history found.");
-            }
-
             _logger.LogInformation("Fetched {Count} records for User {UserId}", records.Count, request.UserId);
             return ResponseDto<List<BorrowingRecordDto>>.Success(records, "Borrowing history fetched successfully.");
         }
