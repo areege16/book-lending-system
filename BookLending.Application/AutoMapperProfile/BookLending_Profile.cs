@@ -23,6 +23,7 @@ namespace BookLending.Application.AutoMapperProfile
 
             #region Borrowing
             CreateMap<BorrowingRecord, BorrowingRecordDto>()
+                 .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.Book.Id))
                  .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book.Title))
                  .ForMember(dest => dest.BookAuthor, opt => opt.MapFrom(src => src.Book.Author))
                  .ForMember(dest => dest.IsOverdue, opt => opt.MapFrom(src => src.ReturnDate == null && src.DueDate < DateTimeOffset.UtcNow));
